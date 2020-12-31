@@ -176,6 +176,27 @@ function update() {
   x = updatedX;
   y = updatedY;
 
+  // すでにゲームオーバーとなっていない場合のみ敵とのあたり判定を行う必要がある
+  if (!isGameOver) {
+    // 更新後の主人公の位置情報と、敵の位置情報とが重なっているかをチェックする
+    var isHit = isAreaOverlap(
+      updatedX,
+      updatedY,
+      32,
+      32,
+      updatedEnemyX,
+      updatedEnemyY,
+      32,
+      32
+    );
+
+    if (isHit) {
+      // ぶつかっていた場合にはゲームオーバーとし、上方向の初速度を与える
+      isGameOver = true;
+      vy = -10;
+    }
+  }
+
   // 敵の画像を表示
   var enemyImage = new Image();
   enemyImage.src = "../images/character-02/base.png";
@@ -226,4 +247,32 @@ function getBlockTargetIsOn(x, y, updatedX, updatedY) {
   }
   // 最後までブロック要素を返さなかった場合はブロック要素の上にいないということなのでnullを返却する
   return null;
+}
+
+/**
+ * 2つの要素(A, B)に重なる部分があるか否かをチェックする
+ * 要素Aの左上の角の座標を(ax, ay)、幅をaw, 高さをahとする
+ * 要素Bの左上の角の座標を(bx, by)、幅をbw, 高さをbhとする
+ */
+function isAreaOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  // A要素の左側の側面が、Bの要素の右端の側面より、右側にあれば重なり得ない
+  if (bx + bw < ax) {
+    return false;
+  }
+  // B要素の左側の側面が、Aの要素の右端の側面より、右側にあれば重なり得ない
+  if (ax + aw < bx) {
+    return false;
+  }
+
+  // A要素の上側の側面が、Bの要素の下端の側面より、下側にあれば重なり得ない
+  if (by + bh < ay) {
+    return false;
+  }
+  // B要素の上側の側面が、Aの要素の下端の側面より、上側にあれば重なり得ない
+  if (ay + ah < by) {
+    return false;
+  }
+
+  // ここまで到達する場合には、どこかしらで重なる
+  return true;
 }
